@@ -70,11 +70,14 @@ const ALL_PIECE_CSS_CLASSES = Object.values(PIECE_CSS_CLASSES);
 const GAME_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " "]);
 
 // DOM 요소
+const menuScreen = document.getElementById("menu-screen");
+const gameScreen = document.getElementById("game-screen");
 const gameBoard = document.getElementById("game-board");
 const scoreElement = document.getElementById("score");
 const gameStatusElement = document.getElementById("game-status");
-const startBtn = document.getElementById("start-btn");
+const menuStartBtn = document.getElementById("menu-start-btn");
 const restartBtn = document.getElementById("restart-btn");
+const controlButtons = document.querySelectorAll(".control-btn");
 
 // 게임 상태
 let score = 0;
@@ -461,6 +464,62 @@ function hardDrop() {
 }
 
 /**
+ * 메뉴 화면을 표시합니다.
+ */
+function showMenuScreen() {
+  menuScreen.classList.add("is-active");
+  menuScreen.hidden = false;
+  gameScreen.classList.remove("is-active");
+  gameScreen.hidden = true;
+}
+
+/**
+ * 게임 화면을 표시합니다.
+ */
+function showGameScreen() {
+  menuScreen.classList.remove("is-active");
+  menuScreen.hidden = true;
+  gameScreen.classList.add("is-active");
+  gameScreen.hidden = false;
+}
+
+/**
+ * 터치/버튼 조작을 처리합니다.
+ */
+function handleControlAction(action) {
+  if (!isGameActive()) {
+    return;
+  }
+
+  switch (action) {
+    case "left":
+      tryMovePiece(-1, 0);
+      break;
+    case "right":
+      tryMovePiece(1, 0);
+      break;
+    case "down":
+      softDrop();
+      break;
+    case "rotate":
+      tryRotatePiece();
+      break;
+  }
+}
+
+/**
+ * 터치 컨트롤 버튼을 등록합니다.
+ */
+function setupTouchControls() {
+  controlButtons.forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      handleControlAction(button.dataset.action);
+    });
+  });
+}
+
+/**
  * 키보드 입력을 처리합니다.
  */
 function handleKeyDown(event) {
@@ -572,14 +631,25 @@ function initGame() {
   renderBoard();
 }
 
-startBtn.addEventListener("click", () => {
+/**
+ * 게임을 시작하고 화면을 전환합니다.
+ */
+function beginGame() {
+  showGameScreen();
+  initGame();
   startGame();
+}
+
+menuStartBtn.addEventListener("click", () => {
+  beginGame();
 });
 
 restartBtn.addEventListener("click", () => {
   initGame();
+  startGame();
 });
 
 applyBoardCssVariables();
 setupKeyboardControls();
+setupTouchControls();
 initGame();
